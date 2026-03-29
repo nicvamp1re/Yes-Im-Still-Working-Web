@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YES I'M STILL WORKING</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="sounds/metal-pipe-pic.png" />
+</head>
+<body id="general">
+<div class="info-container">
+    <div class="info-icon">?</div>
+    <div class="info-bubble">
+        <strong>What is this?</strong><br>
+        The idea behind this simple tool is to play
+        a loud sound at random intervals of your
+        choosing in order to help with concentration during work.
+        It is meant to help people who are easily distracted from work (for example, people with ADHD)
+        by making them "snap out of it" with a sudden loud noise.
+        Brought to you by Mykyta Kusmerchuk, AKA nicvampire
+    </div>
+</div>
+
+<div class="content">
+    <h1>YES I'M STILL WORKING - a random noise concentration tool</h1>
+    <label>Input min interval: </label>
+    <input class="input" type="number" step = "1" id="min" value="0" min = "0" inputmode = "numeric" onchange="saveSettings()">
+    <br><br>
+    <label>Input max interval: </label>
+    <input class="input" type="number" id="max" step = "2" value="300" min = "5" inputmode = "numeric" onchange="saveSettings()">
+    <br><br>
+
+    <div class="volume-container">
+        <label>Volume: </label>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" class="slider">
+        <span id="volValue">50%</span>
+        </div>
+
+    <button id="actionBtn" class="stopped">Start</button>
+    <p id="status">Status: Idle</p>
+</div>
+<audio id="myAudio" src="sounds/metal-pipe.mp3"></audio>
+
+<script src = "index.js"></script>
+</body>
+</html>

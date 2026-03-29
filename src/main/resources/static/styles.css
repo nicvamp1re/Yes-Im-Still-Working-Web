@@ -1,4 +1,146 @@
-#content
+.content
 {
-    
+    padding-top: 15vh;
+    text-align: center;
+    font-family: Impact;
+    color: white;
+    font-size: 30px;
+}
+#general
+{
+    background-color: #404244;
+}
+#actionBtn
+{
+    border-radius: 30px;
+    background-color: #303234;
+    color: white;
+    font-family: Impact;
+    width: 200px;
+    height: 100px;
+    font-size: 30px;
+}
+#actionBtn:hover{
+    background-color: #202224;
+}
+.input{
+    height: 40px;
+    width: 60px;
+    background-color: #303232;
+    color: white;
+    vertical-align: middle;
+    border: none;
+    font-size: 20px;
+    border-radius: 10px;
+    padding-left: 10px;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+/* Position the container in the top left */
+.info-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    cursor: help;
+}
+
+/* The clickable/hoverable circle */
+.info-icon {
+    width: 30px;
+    height: 30px;
+    background-color: #555;
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    border: 2px solid #777;
+    transition: background 0.3s;
+}
+
+.info-container:hover .info-icon {
+    background-color: #888;
+}
+
+/* The Text Bubble (Hidden by default) */
+.info-bubble {
+    visibility: hidden;
+    width: 250px;
+    background-color: #333;
+    color: #fff;
+    text-align: left;
+    border-radius: 8px;
+    padding: 15px;
+    position: absolute;
+    z-index: 1;
+    top: 40px; /* Appear below the icon */
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    border: 1px solid #555;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+}
+
+/* Speech bubble "arrow" */
+.info-bubble::after {
+    content: "";
+    position: absolute;
+    bottom: 100%; /* At the top of the bubble */
+    left: 10px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent transparent #333 transparent;
+}
+
+/* Show the bubble on hover */
+.info-container:hover .info-bubble {
+    visibility: visible;
+    opacity: 1;
+}
+.volume-container {
+    margin-top: 20px;
+    font-family: Impact;
+    color: white;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 150px;
+    height: 8px;
+    background: #303234;
+    outline: none;
+    border-radius: 5px;
+    vertical-align: middle;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: white;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+#volValue {
+    display: inline-block;
+    width: 45px;
+    font-size: 18px;
+    margin-left: 10px;
+}
+h1
+{
+   color: white;
+    letter-spacing: 2px;
+     text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
 }
