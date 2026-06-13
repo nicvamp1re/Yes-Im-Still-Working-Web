@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <a href="index.html" class="btn btn-outline-secondary mb-4">← Back to Dashboard</a>
+
+    <div class="card shadow-sm p-4 mb-4">
+        <h1 id="profileUsername" class="text-primary">Loading Profile...</h1>
+        <p class="text-muted" id="profileJoinDate"></p>
+    </div>
+
+    ### User Comment History
+    <div class="list-group shadow-sm" id="commentHistoryList">
+    </div>
+</div>
+
+<script>
+    // Extract the ID from the URL string: e.g., user-profile.html?id=1
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
+
+    if (!userId) {
+        document.getElementById('profileUsername').innerText = "No User ID Specified";
+    } else {
+        fetch(`/api/users/profile/${userId}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Profile not found");
+                return res.json();
+            })
+            .then(user => {
+                document.getElementById('profileUsername').innerText = user.username;
+
+                // Format the registration timestamp cleanly
+                const createdDate = new Date(user.accountCreated).toLocaleDateString();
+                document.getElementById('profileJoinDate').innerText = `Community member since: ${createdDate}`;
+
+                const historyContainer = document.getElementById('commentHistoryList');
+                if (user.historicComments.length === 0) {
+                    historyContainer.innerHTML = `<div class="list-group-item text-muted">This user hasn't left any feedback yet.</div>`;
+                    return;
+                }
+
+                // Render out their comment history timeline
+                historyContainer.innerHTML = user.historicComments.map(comment => `
+                    <div class="list-group-item">
+                        <small class="text-muted float-end">${new Date(comment.createdAt).toLocaleString()}</small>
+                        <h6 class="mb-1 text-secondary">Posted under Patch: <strong>${comment.patchTitle}</strong></h6>
+                        <p class="mb-1 text-dark">${comment.text}</p>
+                    </div>
+                `).join('');
+            })
+            .catch(err => {
+                document.getElementById('profileUsername').innerText = "Profile Error";
+                document.getElementById('commentHistoryList').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+            });
+    }
+</script>
+</body>
+</html>

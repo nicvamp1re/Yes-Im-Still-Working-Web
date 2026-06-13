@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patch Details & Feedback</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        .comment-author {
+            font-weight: bold;
+            text-decoration: none;
+            color: #0d6efd;
+        }
+        .comment-author:hover {
+            text-decoration: underline;
+        }
+        .deleted-author {
+            font-weight: bold;
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">← Back to Patch Dashboard</a>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-primary text-white">
+            <h1 id="patchTitle" class="h3 mb-0">Loading Patch...</h1>
+            <small id="patchDate"></small>
+        </div>
+        <div class="card-body bg-white" id="patchDesc" style="line-height: 1.6;">
+            <p class="text-muted">Fetching patch contents from database archive...</p>
+        </div>
+    </div>
+
+    <h3 class="mb-3">Community Discussion</h3>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body" id="commentFormContainer">
+        </div>
+    </div>
+
+    <div id="commentsWrapper" class="d-flex flex-column gap-3">
+    </div>
+</div>
+
+<script>
+    // Isolate the patch database record identifier from the current browser URL path
+    const urlParams = new URLSearchParams(window.location.search);
+    const patchId = urlParams.get('id');
+
+    if (!patchId) {
+        document.getElementById('patchTitle').innerText = "Error: No Patch ID target specified.";
+    } else {
+        loadPatchPageData();
+    }
+
+    // Master fetch sequence runner
+    function loadPatchPageData() {
+        fetch(`/api/patches/${patchId}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Patch details could not be resolved.");
+                return res.json();
+            })
+            .then(patch => {
+                // 1. Map Update Specification Metadata
+                document.getElementById('patchTitle').innerText = patch.title;
+                document.getElementById('patchDate').innerText = `Released on: ${new Date(patch.releaseDate).toLocaleDateString()}`;
+                document.getElementById('patchDesc').innerHTML = patch.description;
+
+                // 2. Build Form State Check
+                renderCommentForm();
+
+                // 3. Render Historical Feedbacks and cross-link Profile Anchors
+                const commentsWrapper = document.getElementById('commentsWrapper');
+                if (patch.comments.length === 0) {
+                    commentsWrapper.innerHTML = `<div class="text-muted p-3 border rounded bg-white">No comments left on this update yet. Be the first!</div>`;
+                    return;
+                }
+
+                commentsWrapper.innerHTML = patch.comments.map(c => {
+                    let authorElement;
+
+                    // Condition Check: If userId exists, turn it into a clickable profile link
+                    if (c.userId) {
+                        authorElement = `<a href="user-profile.html?id=${c.userId}" class="comment-author">${c.username}</a>`;
+                    } else {
+                        // If user is null (account deleted), render as standard dead string text
+                        authorElement = `<span class="deleted-author">${c.username}</span>`;
+                    }
+
+                    return `
+                        <div class="card shadow-sm border-0 bg-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    ${authorElement}
+                                    <small class="text-muted">${new Date(c.createdAt).toLocaleString()}</small>
+                                </div>
+                                <p class="mb-0 text-secondary" style="white-space: pre-wrap;">${c.text}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            })
+            .catch(err => {
+                document.getElementById('patchTitle').innerText = "Sync Error";
+                document.getElementById('patchDesc').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+            });
+    }
+
+    // Switches view configurations between authenticated and public visibility bounds
+    function renderCommentForm() {
+        const currentSessionUser = localStorage.getItem("username");
+        const container = document.getElementById("commentFormContainer");
+
+        if (!currentSessionUser) {
+            // Anonymous State: Block interaction completely
+            container.innerHTML = `
+                <div class="alert alert-warning mb-0 text-center">
+                    You must be <a href="index.html" class="alert-link">logged in</a> to participate in the patch discussion.
+                </div>
+            `;
+        } else {
+            // Authenticated State: Clean submission box with no redundant name tracking text input
+            container.innerHTML = `
+                <h5 class="card-title text-secondary mb-3">Posting feedback as: <strong class="text-primary">${currentSessionUser}</strong></h5>
+                <div class="mb-3">
+                    <textarea id="commentInputText" class="form-control" rows="3" placeholder="Write your thoughts on this balance fix..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="submitComment()">Publish Comment</button>
+            `;
+        }
+    }
+
+    // Dispatches new message strings straight to database records
+    function submitComment() {
+        const commentText = document.getElementById("commentInputText").value.trim();
+        if (!commentText) return alert("Comment content field cannot be completely empty.");
+
+        fetch(`/api/patches/${patchId}/comments`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: commentText }) // Only passes the plain text text body payload!
+        })
+        .then(res => {
+            if (res.status === 401) {
+                localStorage.removeItem("username"); // Session died or dropped out
+                throw new Error("Your authentication credentials expired. Please re-authenticate on the home panel.");
+            }
+            if (!res.ok) throw new Error("Could not save your comment.");
+            return res.json();
+        })
+        .then(() => {
+            // Reload data smoothly to view the fresh append
+            loadPatchPageData();
+        })
+        .catch(err => alert("Action Rejected: " + err.message));
+    }
+</script>
+</body>
+</html>
